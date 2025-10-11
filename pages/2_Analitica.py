@@ -7,7 +7,7 @@ import plotly.express as px
 st.set_page_config(page_title="Análisis de Matrículas", layout="wide")
 
 # Cargar datos CSV al iniciar
-csv_path = os.path.join('data\datos_limpio.csv')
+csv_path = os.path.join('data/datos_limpio.csv')
 # Leer el CSV como texto y limpiar comas antes de convertir a numérico
 df = pd.read_csv(csv_path, encoding='utf-8', dtype=str)  # Leer todo como string inicialmente
 for col in ['Id Género', 'Total Matriculados', 'Año']:
