@@ -2,9 +2,49 @@ import streamlit as st
 import pandas as pd
 import os
 import plotly.graph_objects as go
+import plotly.express as px  # Agregado para el gráfico de torta
 import unicodedata 
 
 st.set_page_config(page_title="Análisis de Matrículas", layout="wide")
+
+# CSS personalizado para hacer los selectores más atractivos con colores y barras
+st.markdown("""
+<style>
+    .filter-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        color: white;
+    }
+    .filter-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    .stSelectbox > div > div > div > select {
+        background-color: #f0f2f6;
+        border-radius: 5px;
+        border: 2px solid #667eea;
+        padding: 0.5rem;
+        font-weight: bold;
+    }
+    .stSelectbox > label {
+        color: #333;
+        font-weight: bold;
+    }
+    .emoji-filter {
+        font-size: 1.5em;
+        margin-right: 0.5rem;
+    }
+    .plotly-chart {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
 
 csv_path = os.path.join('data/datos_limpio.csv')
 
@@ -72,40 +112,103 @@ if not por_año_filtrado.empty:
     
     with tab1:
         st.subheader("Matrículas Totales por Año")
-        st.bar_chart(por_año_filtrado.set_index('Año'))
+        
+        # Gráfico de Línea Embellecido con Plotly (sugerencia más bonita para tendencias temporales)
+        fig_line = px.line(por_año_filtrado, 
+                           x='Año', 
+                           y='Total Matriculados', 
+                           title='Evolución de Matrículas Totales por Año',
+                           markers=True,  # Puntos en la línea para resaltar datos
+                           line_shape='spline',  # Curva suave para belleza
+                           color_discrete_sequence=['#636EFA'])  # Color azul moderno
+        
+        fig_line.update_traces(line=dict(width=4), marker=dict(size=8))  # Grosor y tamaño
+        fig_line.update_layout(
+            xaxis_title='Año',
+            yaxis_title='Total Matriculados',
+            font=dict(size=12, family='Arial'),
+            title_font_size=16,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            hovermode='x unified',  # Hover unificado
+            showlegend=False  # Sin leyenda para simplicidad
+        )
+        st.plotly_chart(fig_line, use_container_width=True)
+        
+        # Gráfico de torta agregado en posición 2 (debajo del bar chart)
+        st.subheader("Porcentaje de Matrícula Total por Año")
+        fig_torta = px.pie(por_año_filtrado, 
+                           values='Total Matriculados', 
+                           names='Año', 
+                           title='Distribución Porcentual por Año (Suma de Todas las Instituciones)',
+                           color_discrete_sequence=px.colors.qualitative.Set3)  # Colores diferentes
+        
+        fig_torta.update_traces(textposition='inside', textinfo='percent+label')
+        fig_torta.update_layout(width=800, height=600, font=dict(size=14))
+        st.plotly_chart(fig_torta, use_container_width=True)
     
     with tab2:
         st.dataframe(por_año_filtrado)
 else:
     st.warning("No hay datos en el rango de años seleccionado.")
 
-st.header("Filtros de Datos")
-col1, col2, col3 = st.columns(3)
+# Sección de Filtros Mejorada con Estilo Visual
+st.header("🔍 Filtros de Datos")
+# Contenedor principal con gradiente colorido
+with st.container():
+    st.markdown('<div class="filter-container">', unsafe_allow_html=True)
+    st.markdown('<p class="filter-title">Selecciona tus criterios para filtrar los datos</p>', unsafe_allow_html=True)
+    
+    # Fila 1: Institución, Programa, Departamento
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown('<span class="emoji-filter">🏫</span>', unsafe_allow_html=True)
+        instituciones = sorted(df['Institución de Educación Superior (IES)'].unique().tolist())
+        institucion = st.selectbox("Institución", ["Todas"] + instituciones, index=0, help="Selecciona una universidad específica")
+    
+    with col2:
+        st.markdown('<span class="emoji-filter">📚</span>', unsafe_allow_html=True)
+        programas = sorted(df['Programa Académico'].unique().tolist())
+        programa = st.selectbox("Programa Académico", ["Todos"] + programas, index=0, help="Elige un programa de estudio")
+    
+    with col3:
+        st.markdown('<span class="emoji-filter">🗺️</span>', unsafe_allow_html=True)
+        departamentos = sorted(df['Departamento de oferta del programa'].unique().tolist())
+        departamento = st.selectbox("Departamento", ["Todos"] + departamentos, index=0, help="Filtra por región del país")
+    
+    # Fila 2: Año, Género, Municipio
+    col4, col5, col6 = st.columns(3)
+    
+    with col4:
+        st.markdown('<span class="emoji-filter">📅</span>', unsafe_allow_html=True)
+        años = sorted(df['Año'].unique().tolist(), reverse=True)
+        año = st.selectbox("Año", ["Todos"] + años, index=0, help="Año académico específico")
+    
+    with col5:
+        st.markdown('<span class="emoji-filter">👥</span>', unsafe_allow_html=True)
+        generos = [{'id': 1, 'label': 'Hombres'}, {'id': 2, 'label': 'Mujeres'}]
+        genero_options = ["Todos"] + [g['label'] for g in generos]
+        genero = st.selectbox("Género", genero_options, index=0, help="Filtrar análisis por género de forma independiente (no afecta filtros principales)")
+    
+    with col6:
+        st.markdown('<span class="emoji-filter">🏙️</span>', unsafe_allow_html=True)
+        municipios = sorted(df['Municipio de oferta del programa'].unique().tolist())
+        municipio = st.selectbox("Municipio", ["Todos"] + municipios, index=0, help="Ciudad o municipio exacto")
+    
+    # Selector de Agrupación con estilo
+    st.markdown('<span class="emoji-filter">📊</span>', unsafe_allow_html=True)
+    group_by = st.selectbox("Agrupar por", ["Año", "Institución de Educación Superior (IES)", "Programa Académico", "Departamento de oferta del programa", "Municipio de oferta del programa"], index=0, help="Cómo agrupar los resultados")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-with col1:
-    instituciones = sorted(df['Institución de Educación Superior (IES)'].unique().tolist())
-    institucion = st.selectbox("Institución", ["Todas"] + instituciones, index=0)
-with col2:
-    programas = sorted(df['Programa Académico'].unique().tolist())
-    programa = st.selectbox("Programa Académico", ["Todos"] + programas, index=0)
-with col3:
-    departamentos = sorted(df['Departamento de oferta del programa'].unique().tolist())
-    departamento = st.selectbox("Departamento", ["Todos"] + departamentos, index=0)
+# Barra de progreso visual para filtros aplicados (ejemplo simple basado en cuántos filtros no son "Todos")
+filtros_aplicados = sum([institucion != "Todas", programa != "Todos", departamento != "Todos", año != "Todos", municipio != "Todos"])  # Género independiente, no cuenta aquí
+progreso = filtros_aplicados / 5 * 100
+st.progress(progreso / 100)
+st.caption(f"Progreso de filtros principales: {filtros_aplicados}/5 criterios activos (género es independiente)")
 
-col4, col5, col6 = st.columns(3)
-with col4:
-    años = sorted(df['Año'].unique().tolist(), reverse=True)
-    año = st.selectbox("Año", ["Todos"] + años, index=0)
-with col5:
-    generos = [{'id': 1, 'label': 'Hombres'}, {'id': 2, 'label': 'Mujeres'}]
-    genero_options = ["Todos"] + [g['label'] for g in generos]
-    genero = st.selectbox("Género", genero_options, index=0)
-with col6:
-    municipios = sorted(df['Municipio de oferta del programa'].unique().tolist())
-    municipio = st.selectbox("Municipio", ["Todos"] + municipios, index=0)
-
-group_by = st.selectbox("Agrupar por", ["Año", "Institución de Educación Superior (IES)", "Programa Académico", "Departamento de oferta del programa", "Municipio de oferta del programa"], index=0)
-
+# Filtrado principal SIN género para independencia
 filtered_df = df.copy()
 if institucion != "Todas":
     filtered_df = filtered_df[filtered_df['Institución de Educación Superior (IES)'] == institucion]
@@ -115,13 +218,16 @@ if departamento != "Todos":
     filtered_df = filtered_df[filtered_df['Departamento de oferta del programa'] == departamento]
 if año != "Todos":
     filtered_df = filtered_df[filtered_df['Año'] == int(año)]
-if genero != "Todos":
-    genero_id = next(g['id'] for g in generos if g['label'] == genero)
-    filtered_df = filtered_df[filtered_df['Id Género'] == genero_id]
 if municipio != "Todos":
     filtered_df = filtered_df[filtered_df['Municipio de oferta del programa'] == municipio]
 
-st.header("Resultados Filtrados")
+# Filtrado para género (aplicado a filtered_df para contexto, pero sección independiente)
+filtered_df_genero = filtered_df.copy()
+if genero != "Todos":
+    genero_id = next(g['id'] for g in generos if g['label'] == genero)
+    filtered_df_genero = filtered_df_genero[filtered_df_genero['Id Género'] == genero_id]
+
+st.header("Resultados Filtrados (Totales)")
 st.write(f"**Total de Registros Filtrados:** {len(filtered_df):,}")
 if not filtered_df.empty:
     agrupado = filtered_df.groupby(group_by)['Total Matriculados'].sum().reset_index()
@@ -129,12 +235,149 @@ if not filtered_df.empty:
     
     with tab3:
         st.subheader(f"Matrículas por {group_by}")
-        st.bar_chart(agrupado.set_index(group_by))
+        
+        # Gráfico de Barras Embellecido con Plotly
+        fig_bar = px.bar(agrupado, 
+                         x=group_by, 
+                         y='Total Matriculados', 
+                         title=f'Distribución de Matrículas por {group_by}',
+                         color='Total Matriculados',  # Gradiente de colores basado en valores
+                         color_continuous_scale='Viridis',  # Escala colorida y llamativa
+                         text='Total Matriculados')  # Etiquetas en las barras
+        
+        fig_bar.update_traces(texttemplate='%{text:,}', textposition='outside')  # Formato de números y posición
+        fig_bar.update_layout(
+            xaxis_title=f'{group_by}',
+            yaxis_title='Total Matriculados',
+            font=dict(size=12, family='Arial'),
+            title_font_size=16,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            bargap=0.2,  # Espacio entre barras
+            hovermode='x unified'  # Hover mejorado
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
     
     with tab4:
         st.dataframe(filtered_df)
 else:
     st.warning("No hay datos que cumplan con los filtros seleccionados.")
+
+# Sección autónoma para análisis por Género
+st.header("👥 Análisis por Género (Sección Independiente)")
+st.write(f"**Total de Registros en Análisis por Género:** {len(filtered_df_genero):,}")
+
+if not filtered_df_genero.empty:
+    if genero == "Todos":
+        # Para "Todos", usar filtered_df completo para pirámide y datos con género
+        gender_analysis_df = filtered_df.copy()
+        gender_analysis_df['Género'] = gender_analysis_df['Id Género'].map({1: 'Hombres', 2: 'Mujeres'})
+        tab_gender1, tab_gender2 = st.tabs(["📈 Pirámide por Género", "🗃 Resumen Total por Género"])
+        
+        with tab_gender1:
+            # Pirámide usando filtered_df
+            pyramid_data = filtered_df.groupby(['Año', 'Id Género'])['Total Matriculados'].sum().reset_index()
+            pyramid_data['Género'] = pyramid_data['Id Género'].map({1: 'Hombres', 2: 'Mujeres'})
+            
+            if len(filtered_df['Año'].unique()) > 1:
+                # Hombres negativos para espejo (pirámide)
+                pyramid_data['Matriculados_Piramide'] = pyramid_data.apply(
+                    lambda row: -row['Total Matriculados'] if row['Género'] == 'Hombres' else row['Total Matriculados'], axis=1
+                )
+                
+                # Crear figura de pirámide
+                fig_pyramid = px.bar(pyramid_data, 
+                                     x='Matriculados_Piramide', 
+                                     y='Año', 
+                                     color='Género',
+                                     orientation='h',  # Horizontal para pirámide
+                                     title='Pirámide de Matrículas por Género y Año',
+                                     color_discrete_map={'Hombres': '#1f77b4', 'Mujeres': '#ff7f0e'},  # Azul y naranja
+                                     text='Total Matriculados')
+                
+                fig_pyramid.update_traces(texttemplate='%{text:,}', textposition='outside')
+                fig_pyramid.update_layout(
+                    xaxis_title='Total Matriculados (Hombres negativos, Mujeres positivas)',
+                    yaxis_title='Año',
+                    font=dict(size=12, family='Arial'),
+                    title_font_size=16,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    bargap=0.1,
+                    hovermode='y unified',
+                    xaxis=dict(zeroline=True, zerolinecolor='black', zerolinewidth=2)  # Línea central
+                )
+                
+                # Invertir orden de años para que sea de mayor a menor (como pirámide tradicional)
+                fig_pyramid.update_yaxes(categoryorder='total ascending')
+                
+                st.plotly_chart(fig_pyramid, use_container_width=True)
+            else:
+                st.info("Selecciona un rango de años mayor para ver la pirámide.")
+        
+        with tab_gender2:
+            # Resumen total: Agrupar por Género y group_by, sumando Total Matriculados (sin desglose por año)
+            gender_summary = gender_analysis_df.groupby(['Género', group_by])['Total Matriculados'].sum().reset_index()
+            gender_summary.columns = ['Género', group_by, 'Total Matriculados']  # Renombrar para claridad
+            st.dataframe(gender_summary)
+    else:
+        # Para género específico
+        genero_id = next(g['id'] for g in generos if g['label'] == genero)
+        tab_gender1, tab_gender2 = st.tabs([f"📈 Gráfico para {genero}", f"🗃 Resumen Total para {genero}"])
+        
+        with tab_gender1:
+            st.subheader(f"Matrículas por {group_by} ({genero})")
+            agrupado_genero = filtered_df_genero.groupby(group_by)['Total Matriculados'].sum().reset_index()
+            
+            fig_bar_genero = px.bar(agrupado_genero, 
+                                    x=group_by, 
+                                    y='Total Matriculados', 
+                                    title=f'Distribución de Matrículas por {group_by} ({genero})',
+                                    color='Total Matriculados',  
+                                    color_continuous_scale='Plasma',  
+                                    text='Total Matriculados')  
+            
+            fig_bar_genero.update_traces(texttemplate='%{text:,}', textposition='outside')  
+            fig_bar_genero.update_layout(
+                xaxis_title=f'{group_by}',
+                yaxis_title=f'Total Matriculados ({genero})',
+                font=dict(size=12, family='Arial'),
+                title_font_size=16,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                bargap=0.2,  
+                hovermode='x unified'  
+            )
+            st.plotly_chart(fig_bar_genero, use_container_width=True)
+            
+            # Gráfico adicional por Año para género
+            st.subheader(f"Matrículas por Año ({genero})")
+            gender_by_year = filtered_df_genero.groupby('Año')['Total Matriculados'].sum().reset_index()
+            fig_year = px.line(gender_by_year, 
+                               x='Año', 
+                               y='Total Matriculados', 
+                               title=f'Evolución de Matrículas por Año ({genero})',
+                               markers=True,
+                               color_discrete_sequence=['#1f77b4' if genero == 'Hombres' else '#ff7f0e'])
+            fig_year.update_layout(
+                xaxis_title='Año',
+                yaxis_title=f'Total Matriculados ({genero})',
+                font=dict(size=12, family='Arial'),
+                title_font_size=16,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                hovermode='x unified',
+                showlegend=False
+            )
+            st.plotly_chart(fig_year, use_container_width=True)
+        
+        with tab_gender2:
+            # Resumen total: Agrupar por group_by, sumando Total Matriculados (sin desglose por año)
+            gender_summary = filtered_df_genero.groupby(group_by)['Total Matriculados'].sum().reset_index()
+            gender_summary.columns = [group_by, 'Total Matriculados']  # Renombrar para claridad
+            st.dataframe(gender_summary)
+else:
+    st.warning("No hay datos para el análisis por género seleccionado.")
 
 st.header("Mapa de Ubicaciones de Universidades")
 if not filtered_df.empty and coords_dict:
