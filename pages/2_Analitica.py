@@ -427,7 +427,7 @@ if not filtered_df.empty and coords_dict:
                 pitch=0,
                 zoom=5
             ),
-            title="Colocar descripción",
+            title="Colocar descripción ojo ",
         )
 
         st.plotly_chart(fig_mapa, use_container_width=True)
