@@ -1,72 +1,81 @@
 import streamlit as st
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
+from langchain_community.document_loaders import TextLoader
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.llms import Ollama
 import os
-from datetime import datetime
 
-# --- CONFIGURACIÓN INICIAL ---
-st.set_page_config(page_title="Pregúntale a Neonix", page_icon="🧢", layout="centered")
 
-# --- CARGA DEL MODELO (LIGERO) ---
-@st.cache_resource
-def load_model():
-    model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Modelo liviano y gratuito (~500 MB)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float32)
-    model.to("cpu")
-    return tokenizer, model
+# --- Configuración de la página ---
+st.set_page_config(page_title="Pregúntale a Neonix", page_icon="💬", layout="centered")
 
-tokenizer, model = load_model()
+st.title("💬 Pregúntale a Neonix")
+st.markdown("Tu asistente virtual impulsado por IA local 🧠")
+st.caption("Basado en la información del archivo `neonix_info.txt`")
 
-# --- CARGAR INFORMACIÓN DE LA MARCA ---
-ruta_datos = os.path.join("data", "neonix_info.txt")
+# --- Rutas ---
+data_path = "data/neonix_info.txt"
+index_path = "embeddings/neonix_index.faiss"
 
-if not os.path.exists(ruta_datos):
-    st.error(f"No se encontró el archivo de información en {ruta_datos}")
+# --- Verificar existencia del archivo ---
+if not os.path.exists(data_path):
+    st.error(f"No se encontró `{data_path}`. Crea el archivo dentro de la carpeta `/data` con información sobre Neonix.")
     st.stop()
 
-with open(ruta_datos, "r", encoding="utf-8") as f:
-    neonix_info = f.read()
+# --- Cargar documentos ---
+loader = TextLoader(data_path, encoding="utf-8")
+documents = loader.load()
 
-# --- INTERFAZ ---
-st.markdown("📁 **Información de marca actualizada por última vez:** " + datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-st.title("🧢 Pregúntale a Neonix")
-st.write("Tu asistente virtual de la marca **Neonix**. Pregunta lo que quieras sobre nuestros productos, estilo o filosofía urbana.")
+# --- Dividir texto en fragmentos ---
+splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+texts = splitter.split_documents(documents)
 
-# --- HISTORIAL ---
-if "history" not in st.session_state:
-    st.session_state["history"] = []
+# --- Crear embeddings ---
+embeddings = OllamaEmbeddings(model="llama3")
+os.makedirs("embeddings", exist_ok=True)
 
-# --- ENTRADA DEL USUARIO ---
-user_input = st.text_input("🗣️ Escribe tu pregunta aquí:", "")
+# --- Cargar o crear el índice FAISS ---
+if os.path.exists(index_path):
+    db = FAISS.load_local(index_path, embeddings, allow_dangerous_deserialization=True)
+else:
+    db = FAISS.from_documents(texts, embeddings)
+    db.save_local(index_path)
 
-# --- PROCESAMIENTO ---
-if user_input:
-    with st.spinner("🌀 Neonix está pensando..."):
-        prompt = f"""
-Eres Neonix, el asistente virtual de la marca de ropa urbana "Neonix".
-Usa la siguiente información para responder las preguntas de los usuarios:
+retriever = db.as_retriever()
 
-{neonix_info}
+# --- Configurar modelo LLM ---
+llm = Ollama(model="llama3")
 
-Pregunta del usuario: {user_input}
+# --- Función para obtener respuesta sin usar create_retrieval_chain ---
+def retrieve_and_answer(query):
+    docs = retriever.invoke(query)
+    context = "\n\n".join([d.page_content for d in docs])
+    full_prompt = f"""
+Eres **Neonix**, el asistente virtual oficial de la marca de ropa urbana *Neonix*.
+Tu tarea es responder con precisión, usando solo la siguiente información de contexto.
+
+Contexto:
+{context}
+
+Pregunta:
+{query}
+
 Respuesta:
 """
-        inputs = tokenizer(prompt, return_tensors="pt", truncation=True)
-        outputs = model.generate(**inputs, max_new_tokens=150)
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    response = llm.invoke(full_prompt)
+    return response
 
-        # Limpiar respuesta (solo mostrar parte final)
-        if "Respuesta:" in response:
-            response = response.split("Respuesta:")[-1].strip()
+# --- Interfaz de usuario ---
+query = st.text_input("✍️ Escribe tu pregunta sobre Neonix:")
 
-        st.session_state["history"].append({"usuario": user_input, "neonix": response})
-        st.success(response)
+if query:
+    with st.spinner("🧩 Neonix está pensando..."):
+        try:
+            result = retrieve_and_answer(query)
+            st.success(result)
+        except Exception as e:
+            st.error(f"Ocurrió un error: {e}")
 
-# --- HISTORIAL DE CONVERSACIÓN ---
-if st.session_state["history"]:
-    st.markdown("### 💬 Conversaciones anteriores")
-    for chat in reversed(st.session_state["history"]):
-        st.markdown(f"**Tú:** {chat['usuario']}")
-        st.markdown(f"**🧢 Neonix:** {chat['neonix']}")
-        st.markdown("---")
+st.divider()
+st.caption("💡 Consejo: puedes actualizar el archivo `neonix_info.txt` para entrenar a Neonix con nueva información.")
