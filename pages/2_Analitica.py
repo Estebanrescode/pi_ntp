@@ -80,7 +80,7 @@ def load_municipios_coords():
         }
         coords_dict.update(fallback)
         
-        #st.success(f"Coordenadas cargadas: {len(coords_dict)} entradas.")
+        #st.success(f"Coordenadas cargadas: {len(coords_dict)} entradas.
         return coords_dict, mun_df  
     
     except Exception as e:
@@ -114,11 +114,7 @@ st.markdown("""
 
 
 
-
-
-
-
-# Sección de Filtros Mejorada con Estilo Visual 
+# Sección de Filtros Mejorada con Estilo Visua
 st.header("Explora los datos")
 # Contenedor principal con gradiente colorido
 with st.container():
