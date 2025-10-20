@@ -173,8 +173,16 @@ webencodings==0.5.1
 websocket-client==1.9.0
 websockets==15.0.1
 Werkzeug==3.1.3
+<<<<<<< HEAD
 wrapt==2.0.0
 xxhash==3.6.0
 yarl==1.22.0
 zipp==3.23.0
 zstandard==0.25.0
+=======
+langchain
+langchain-community
+langchain-text-splitters
+faiss-cpu
+ollama
+>>>>>>> c32a0454a254a98672a6723c7e3d5a16461be89a
