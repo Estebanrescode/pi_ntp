@@ -113,7 +113,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-
+st.markdown("---")
 # Sección de Filtros Mejorada con Estilo Visua
 st.header("Explora los datos")
 # Contenedor principal con gradiente colorido
@@ -181,6 +181,10 @@ if año != "Todos":
     filtered_df = filtered_df[filtered_df['Año'] == int(año)]
 if municipio != "Todos":
     filtered_df = filtered_df[filtered_df['Municipio de oferta del programa'] == municipio]
+# 💾 Guardar el DataFrame filtrado en la sesión para usarlo en otras páginas (como inicio.py)
+st.session_state["filtered_df"] = filtered_df
+st.session_state["df"] = df  # opcional, por si necesitas el dataframe completo también
+
 
 # Filtrado para género (aplicado a filtered_df para contexto, pero sección independiente)
 filtered_df_genero = filtered_df.copy()
@@ -225,7 +229,7 @@ else:
 
 
 
-
+st.markdown("---")
 st.markdown("<a name='tendencias'></a>", unsafe_allow_html=True)
 st.header("Análisis de tendencias (evolución en el tiempo)")
 st.markdown('Observa cómo han cambiado las matrículas a lo largo de los años. Este apartado permite identificar tendencias, crecimientos o descensos en la educación superior colombiana entre 2015 y 2020 a través de un filtro dinámico.')
@@ -265,7 +269,7 @@ if not por_año_filtrado.empty:
 
 
 
-        
+        st.markdown("---")
         # Gráfico de torta agregado en posición 2 (debajo del bar chart)
         st.markdown("<a name='distribucion'></a>", unsafe_allow_html=True)
         st.header("Distribución general de matrículas")
@@ -287,7 +291,7 @@ else:
 
 
 
-
+st.markdown("---")
 # Sección autónoma para análisis por Género
 st.markdown("<a name='genero'></a>", unsafe_allow_html=True)
 st.header("Análisis por género")
@@ -407,7 +411,7 @@ else:
 
 
 
-
+st.markdown("---")
 # Análisis por Institución (IES)
 st.markdown("<a name='ies'></a>", unsafe_allow_html=True)
 st.header("Análisis por Institución (IES)")
@@ -507,7 +511,7 @@ if ies_para_comparar:
     st.plotly_chart(fig_evolucion, use_container_width=True)
 
 
-
+st.markdown("---")
 st.markdown("<a name='mapa'></a>", unsafe_allow_html=True)
 st.header("Mapa de Ubicaciones de Universidades")
 if not filtered_df.empty and coords_dict:
@@ -572,7 +576,7 @@ if not filtered_df.empty and coords_dict:
 
 
 
-
+st.markdown("---")
 st.header("Indicadores adicionales")
 st.markdown("Aquí se presentan métricas complementarias para entender con más detalle el comportamiento de las matrículas: "
     "crecimiento anual, promedios por institución y análisis regional."
