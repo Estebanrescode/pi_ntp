@@ -49,4 +49,5 @@ langchain-community
 faiss-cpu
 groq
 python-dotenv
+langchain-groq
 
