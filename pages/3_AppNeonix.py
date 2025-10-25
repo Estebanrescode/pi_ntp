@@ -1,4 +1,14 @@
 import streamlit as st
+import os
+from dotenv import load_dotenv
+from langchain_community.document_loaders import TextLoader
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_groq import ChatGroq
+
+
+# === CONFIGURACIÓN DE LA PÁGINA ===
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS 
@@ -14,6 +24,22 @@ st.title("💬 Pregúntale a Neonix")
 st.markdown("Tu asistente virtual impulsado por IA local 🧠")
 st.caption("Basado en la información del archivo `neonix_info.txt`")
 
+
+# === CARGAR VARIABLES DE ENTORNO ===
+load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    st.error("⚠️ No se encontró la variable `GROQ_API_KEY` en el archivo `.env`.")
+    st.stop()
+
+
+# === RUTAS ===
+data_path = "data/neonix_info.txt"
+index_path = "embeddings/neonix_index.faiss"
+
+
+# === VERIFICAR EXISTENCIA DEL ARCHIVO DE DATOS ===
 # --- Rutas ---
 data_path = "data/neonix_info.txt"
 index_path = "embeddings/neonix_index.faiss"
@@ -22,6 +48,21 @@ index_path = "embeddings/neonix_index.faiss"
 if not os.path.exists(data_path):
     st.error(f"No se encontró `{data_path}`. Crea el archivo dentro de la carpeta `/data` con información sobre Neonix.")
     st.stop()
+
+
+# === CARGAR DOCUMENTOS ===
+loader = TextLoader(data_path, encoding="utf-8")
+documents = loader.load()
+
+
+# === DIVIDIR TEXTO EN FRAGMENTOS ===
+splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+texts = splitter.split_documents(documents)
+
+
+# === CREAR O CARGAR EMBEDDINGS ===
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+os.makedirs("embeddings", exist_ok=True)
 
 # --- Cargar documentos ---
 loader = TextLoader(data_path, encoding="utf-8")
@@ -44,6 +85,12 @@ else:
 
 retriever = db.as_retriever()
 
+
+# === CONFIGURAR MODELO GROQ ===
+llm = ChatGroq(model="llama-3.1-8b-instant", api_key=GROQ_API_KEY)
+
+
+# === FUNCIÓN DE RESPUESTA ===
 # --- Configurar modelo LLM ---
 llm = Ollama(model="llama3")
 
@@ -64,6 +111,9 @@ Pregunta:
 Respuesta:
 """
     response = llm.invoke(full_prompt)
+    return response.content
+
+# === INTERFAZ DE USUARIO ===
     return response
 
 # --- Interfaz de usuario ---
