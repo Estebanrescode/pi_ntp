@@ -38,7 +38,7 @@ def load_data(endpoint):
 df_categories    = load_data("categories")
 df_products      = load_data("products")
 df_users         = load_data("users")
-df_pay           = load_data("paymentMethods")
+df_pay           = load_data("payMethods")
 df_orders        = load_data("orders")
 df_order_details = load_data("orderDetails")
 
