@@ -38,39 +38,9 @@ with col2:
 st.markdown("---")
 st.header("📋 Proyecto Integrador")
 
-st.markdown("""
-**Descripción**: Este proyecto integra conceptos de desarrollo web, análisis de datos y IA para crear una aplicación completa. 
-Es el corazón de esta app, donde se unen todas las herramientas.
-""")
-# Elemento interactivo: Selector para etapas del proyecto
-etapa = st.selectbox("Selecciona una etapa del proyecto:", ["Planificación", "Desarrollo", "Pruebas", "Despliegue"])
-if etapa == "Planificación":
-    st.success("En esta etapa, definimos objetivos y recursos. ¡Interactúa para ver un checklist!")
-    st.checkbox("Definir objetivos")
-    st.checkbox("Asignar roles al equipo")
-elif etapa == "Desarrollo":
-    st.info("Aquí codificamos con Python y Streamlit. Prueba un botón de simulación.")
-    if st.button("Simular commit de código"):
-        st.balloons()
-elif etapa == "Pruebas":
-    st.warning("Realizamos pruebas unitarias y de integración. ¡Verifica el estado!")
-    st.progress(75)
-elif etapa == "Despliegue":
-    st.success("¡Listo para producción! Simula el deploy.")
-    if st.button("Simular despliegue"):
-        st.success("¡Desplegado exitosamente! 🚀")
+st.markdown("El Dashboard Neonix es una aplicación web interactiva que permite visualizar y analizar de forma dinámica la información relacionada con las ventas, productos y clientes del e-commerce de Neonix. Desde el inicio, el usuario puede explorar una galería con los productos más destacados de la tienda, filtrados por categoría. Posteriormente, el panel ofrece distintas secciones con gráficos y tablas que facilitan la comprensión del estado del inventario, los niveles de stock, los precios promedio por categoría y la distribución general de los productos disponibles en la plataforma.")
 
-
-
-# --- Recuperar los datos guardados en sesión desde 2_Analitica.py ---
-if "filtered_df" in st.session_state:
-    filtered_df = st.session_state["filtered_df"]
-else:
-    st.warning("⚠️ No se encontró el DataFrame filtrado. Ve primero a la página 'Análisis de Matrículas' para generar los filtros.")
-    st.stop()
-
-# También intentamos recuperar el DataFrame completo si lo guardaste
-df = st.session_state.get("df", filtered_df)
+st.markdown("Además, el usuario puede examinar el comportamiento de las ventas a través de filtros personalizados por fecha, método de pago, estado del pedido o cliente, así como identificar los artículos más vendidos y los compradores más activos. El panel incluye métricas generales de desempeño, comparaciones por año y rankings de ventas que resumen la información clave del negocio. En conjunto, el Dashboard Neonix brinda una herramienta completa, visual e intuitiva para monitorear la actividad comercial y apoyar la toma de decisiones dentro del entorno digital de la marca.")
 
 
 # Sección 2: Analítica
