@@ -199,16 +199,12 @@ with tab_gender2:
 
 # Sección 3: App Gemini
 st.markdown("---")
-st.header("🤖 App Gemini")
+st.header("Interectúa con Neonix.")
 
-st.markdown("""
-**Descripción**: Integración con Google Gemini para generación de texto y chat IA. (Nota: Requiere API key para funcionalidad completa).
-""")
-# Elemento interactivo: Input de texto simulado
-prompt = st.text_input("Escribe un prompt para Gemini:")
-if st.button("Generar respuesta (simulada)"):
-    st.write(f"Respuesta simulada de Gemini: '¡Hola! Tu prompt sobre {prompt} es genial. En un entorno real, generaría contenido personalizado.'")
-st.info("Para producción, usa la API de Google Gemini con tu clave.")
+st.markdown("La aplicación Pregúntale a Neonix ofrece a los usuarios un asistente virtual con el que pueden interactuar directamente para resolver dudas o conocer más sobre la marca de ropa urbana Neonix. A través de una interfaz sencilla y amigable, el usuario solo debe escribir su pregunta en el campo de texto para recibir una respuesta clara y precisa, basada en la información oficial de la marca. De esta forma, la aplicación actúa como un canal informativo automatizado que facilita la consulta de datos relevantes sin necesidad de navegar por diferentes páginas o documentos.")
+
+st.markdown("Al ingresar, el visitante encontrará una experiencia conversacional dinámica donde Neonix responde de manera contextual y coherente sobre distintos aspectos de la marca, como su historia, productos, filosofía o servicios. Además, la aplicación se actualiza fácilmente al modificar su fuente de información, lo que permite mantener las respuestas al día. En conjunto, Pregúntale a Neonix funciona como una herramienta práctica e intuitiva para mejorar la comunicación entre la marca y sus usuarios, combinando accesibilidad y tecnología de inteligencia artificial.")
+
 
 
 
@@ -221,50 +217,32 @@ col_team1, col_team2, col_team3 = st.columns(3)
 with col_team1:
     st.markdown("""
     ### Santiago Díaz
-    **Desarrollador Principal**
+    **Desarrollador**
     """)
-    st.image("https://via.placeholder.com/150x150?text=Juan+Pérez", use_column_width=True)
-    st.markdown("""
-    Experto en Python y Streamlit con más de 5 años de experiencia. Apasionado por la IA y el análisis de datos.
-    """)
+
 
 with col_team2:
     st.markdown("""
     ### Leandro Acevedo
-    **Diseñadora UX/UI**
-    """)
-    st.image("https://via.placeholder.com/150x150?text=María+López", use_column_width=True)
-    st.markdown("""
-    Especialista en interfaces intuitivas. Crea experiencias de usuario memorables y accesibles.
+    **Desarrollador**
     """)
 
 with col_team3:
     st.markdown("""
     ### Mateo González
-    **Analista de Datos**
-    """)
-    st.image("https://via.placeholder.com/150x150?text=Carlos+García", use_column_width=True)
-    st.markdown("""
-    Maestro en el manejo de grandes volúmenes de datos. Transforma números en insights accionables.
+    **Desarrollador**
     """)
 
 with col_team1:
     st.markdown("""
     ### Javier Restrepo
-    **Analista de Datos**
+    **Desarrollador**
     """)
-    st.image("https://via.placeholder.com/150x150?text=Carlos+García", use_column_width=True)
-    st.markdown("""
-    Maestro en el manejo de grandes volúmenes de datos. Transforma números en insights accionables.
-    """)
+
 
 with col_team2:
     st.markdown("""
     ### Luis Miranda
-    **Analista de Datos**
-    """)
-    st.image("https://via.placeholder.com/150x150?text=Carlos+García", use_column_width=True)
-    st.markdown("""
-    Maestro en el manejo de grandes volúmenes de datos. Transforma números en insights accionables.
+    **Desarrollador**
     """)
 
