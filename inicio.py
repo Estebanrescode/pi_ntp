@@ -27,7 +27,7 @@ with col1:
     st.markdown("""
     - **Proyecto integrador**: Vas a interactuar con información y datos de la tienda Neonix.
     - **Análisis de datos**: Conocerás sobre la evolución de la educación superior en Colombia: Análisis de matrículas 2015-2020.
-    - **XXX**: Por medio de la IA podrás XXX.
+    - **Pregúntale a la IA**: Por medio de la IA podrás preguntarlr acerca de Neonix y su historia.
     """)
 
 with col2:
