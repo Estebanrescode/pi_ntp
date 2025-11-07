@@ -13,8 +13,7 @@ st.set_page_config(
     page_icon="🧢"
 )
 
-st.title("🧢 Dashboard Neonix — E-commerce de Ropa Urbana")
-st.markdown("Explora tus datos de clientes, productos y pedidos de forma interactiva.")
+st.title("🧢 Neonix — E-commerce.")
 
 # Tema Plotly
 px.defaults.template = "plotly_dark"
@@ -45,7 +44,7 @@ df_order_details = load_data("orderDetails")
 # ===========================
 # 🛍️ Productos destacados (preámbulo)
 # ===========================
-st.markdown("## ✨ Algunos de mis productos")
+st.markdown("## ✨ Algunos de nuestros productos")
 if not (df_products.empty or df_categories.empty):
     df_products = df_products.merge(
         df_categories[["id","name"]],
@@ -58,7 +57,7 @@ if not (df_products.empty or df_categories.empty):
 
     categorias = sorted(df_products["categoria"].dropna().unique().tolist())
     for cat in categorias:
-        st.markdown(f"### 📦 Categoría: **{cat}**")
+        st.markdown(f"### 📦**{cat}**")
         df_cat = df_products[df_products["categoria"] == cat].head(2)
         cols = st.columns(len(df_cat))
         for idx, (_, row) in enumerate(df_cat.iterrows()):
@@ -97,7 +96,7 @@ else:
 
 # ===================================
 # 📊 Sección — PRODUCTOS
-st.header("📊 Dashboard de Productos")
+st.header("📊")
 if df_products.empty or df_categories.empty:
     st.warning("⚠️ No hay datos de productos o categorías.")
 else:
@@ -182,7 +181,7 @@ else:
 
 # ===================================
 # 📦 Sección — PEDIDOS
-st.header("📦 Dashboard de Pedidos")
+st.header("📦")
 if df_orders.empty:
     st.warning("⚠️ No hay datos suficientes para mostrar los pedidos.")
 else:
@@ -374,7 +373,7 @@ else:
 
 # ===================================
 # 🌟 Sección — TOP 5 Usuarios (ventas totales)
-st.header("🌟 Top 5 Usuarios por Ventas Totales")
+st.header("🌟 Top 5 Usuarios.")
 
 if not (df_orders.empty or df_users.empty):
     df_o2 = df_orders.copy()
